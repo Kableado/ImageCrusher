@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
+using System.Drawing.Drawing2D;
 
 namespace ImageCrusher
 {
@@ -104,7 +105,7 @@ namespace ImageCrusher
                             Directory.CreateDirectory(destPath);
                         }
 
-                        Image imgThumb = img.GetThumbnailImage(width, height, null, new System.IntPtr());
+                        Image imgThumb = Image_Resize(img, width, height);
                         string newFileName = String.Format("{0}/{1}.small.jpg", destPath, Path.GetFileNameWithoutExtension(fileName));
                         imgThumb.Save(newFileName, ImageFormat.Jpeg);
 
@@ -117,6 +118,19 @@ namespace ImageCrusher
                 }
             }
             lstImagenes_AddLine("End.");
+        }
+
+
+        public Image Image_Resize(Image img, int width, int height)
+        {
+            Bitmap bitmap = new Bitmap(width, height);
+            Graphics imgGraph = Graphics.FromImage(bitmap);
+            imgGraph.CompositingQuality = CompositingQuality.HighQuality;
+            imgGraph.SmoothingMode = SmoothingMode.HighQuality;
+            imgGraph.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            var imgDimesions = new Rectangle(0, 0, width, height);
+            imgGraph.DrawImage(img, imgDimesions);
+            return bitmap;
         }
     }
 }
