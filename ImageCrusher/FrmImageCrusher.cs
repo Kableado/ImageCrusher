@@ -66,7 +66,7 @@ namespace ImageCrusher
 
         private void btnCrush_Click(object sender, EventArgs e)
         {
-            string path=txtPath.Text;
+            string path = txtPath.Text;
             if (!Directory.Exists(path))
             {
                 MessageBox.Show("El directorio no existe");
