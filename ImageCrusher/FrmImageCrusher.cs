@@ -109,6 +109,9 @@ namespace ImageCrusher
                         string newFileName = String.Format("{0}/{1}.small.jpg", destPath, Path.GetFileNameWithoutExtension(fileName));
                         imgThumb.Save(newFileName, ImageFormat.Jpeg);
 
+                        // Hack: collect garbage now
+                        GC.Collect();
+
                         lstImagenes_AddLine(string.Format("OK: {0}", newFileName));
                     }
                     catch (Exception ex)
