@@ -14,14 +14,6 @@ namespace ImageCrusher
 {
     public partial class FrmImageCrusher : Form
     {
-        string _initialPath = string.Empty;
-
-        private void Initialize()
-        {
-            InitializeComponent();
-            txtPath.Text = _initialPath;
-        }
-
         public string InitialPath
         {
             get { return txtPath.Text; }
@@ -46,7 +38,14 @@ namespace ImageCrusher
         {
             InitializeComponent();
             txtPath.Text = Directory.GetCurrentDirectory();
+            txtSize.Text = Properties.Settings.Default.LastSize;
             txtSize.Text = InitialSize.ToString();
+        }
+        
+        private void FrmImageCrusher_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Properties.Settings.Default.LastSize = txtSize.Text;
+            Properties.Settings.Default.Save();
         }
 
         private void lstImagenes_Clean()
@@ -135,5 +134,6 @@ namespace ImageCrusher
             imgGraph.DrawImage(img, imgDimesions);
             return bitmap;
         }
+
     }
 }

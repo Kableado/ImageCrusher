@@ -108,6 +108,7 @@
             this.Controls.Add(this.btnCrush);
             this.Name = "FrmImageCrusher";
             this.Text = "ImageCrusher";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.FrmImageCrusher_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
