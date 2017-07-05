@@ -67,56 +67,84 @@ namespace ImageCrusher
                 return;
             }
 
-            String destPath = String.Format("{0}/small", path);
+            String destPath;
+            if (path.EndsWith("/") || path.EndsWith("\\"))
+            {
+                path = path.Substring(0, path.Length - 1);
+            }
+            destPath = String.Format("{0}/small", path);
+            string currentPath = path;
+
             int size = InitialSize;
 
             lstImagenes_Clean();
 
-            string[] fileNames = Directory.GetFiles(path);
-            foreach (string fileName in fileNames)
-            {
-                string ext = Path.GetExtension(fileName).ToLower();
-                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
-                {
-                    try
-                    {
-                        Image img = Image.FromFile(fileName);
-                        int width = img.Width;
-                        int height = img.Height;
-                        if (width > height)
-                        {
-                            height = (int)(height / (width / (double)size));
-                            width = size;
-                        }
-                        else
-                        {
-                            width = (int)(width / (height / (double)size));
-                            height = size;
-                        }
-
-                        if (!Directory.Exists(destPath))
-                        {
-                            Directory.CreateDirectory(destPath);
-                        }
-
-                        Image imgThumb = Image_Resize(img, width, height);
-                        string newFileName = String.Format("{0}/{1}.small.jpg", destPath, Path.GetFileNameWithoutExtension(fileName));
-                        imgThumb.Save(newFileName, ImageFormat.Jpeg);
-
-                        // Hack: collect garbage now
-                        GC.Collect();
-
-                        lstImagenes_AddLine(string.Format("OK: {0}", newFileName));
-                    }
-                    catch (Exception ex)
-                    {
-                        lstImagenes_AddLine(string.Format("Error: {0} {1}", fileName, ex.Message));
-                    }
-                }
-            }
+            ProcessDirectory(currentPath, path, destPath, size);
             lstImagenes_AddLine("End.");
         }
 
+        private void ProcessDirectory(string currentPath, string path, string destPath, int size)
+        {
+            string[] fileNames = Directory.GetFiles(currentPath);
+            foreach (string fileName in fileNames)
+            {
+                ProcessFile(fileName, path, destPath, size);
+            }
+            string[] directories = Directory.GetDirectories(currentPath);
+            foreach (string directory in directories)
+            {
+                ProcessDirectory(directory, path, destPath, size);
+            }
+        }
+
+        private void ProcessFile(string fileName, string path, string destPath, int size)
+        {
+            string ext = Path.GetExtension(fileName).ToLower();
+            if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+            {
+                try
+                {
+                    Image img = Image.FromFile(fileName);
+                    Image imgThumb = Image_GenerateThumbnail(img, size);
+
+                    string fileDirectory = Path.GetDirectoryName(fileName);
+                    fileDirectory = fileDirectory.Replace(path, destPath);
+                    if (!Directory.Exists(fileDirectory))
+                    {
+                        Directory.CreateDirectory(fileDirectory);
+                    }
+                    string newFileName = String.Format("{0}/{1}.small.jpg", fileDirectory, Path.GetFileNameWithoutExtension(fileName));
+                    imgThumb.Save(newFileName, ImageFormat.Jpeg);
+
+                    // Hack: collect garbage now
+                    GC.Collect();
+
+                    lstImagenes_AddLine(string.Format("OK: {0}", newFileName));
+                }
+                catch (Exception ex)
+                {
+                    lstImagenes_AddLine(string.Format("Error: {0} {1}", fileName, ex.Message));
+                }
+            }
+        }
+
+        private Image Image_GenerateThumbnail(Image img, int size)
+        {
+            int width = img.Width;
+            int height = img.Height;
+            if (width > height)
+            {
+                height = (int)(height / (width / (double)size));
+                width = size;
+            }
+            else
+            {
+                width = (int)(width / (height / (double)size));
+                height = size;
+            }
+            Image imgThumb = Image_Resize(img, width, height);
+            return imgThumb;
+        }
 
         public Image Image_Resize(Image img, int width, int height)
         {
