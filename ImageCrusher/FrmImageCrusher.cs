@@ -93,6 +93,8 @@ namespace ImageCrusher
             string[] directories = Directory.GetDirectories(currentPath);
             foreach (string directory in directories)
             {
+                string dirName = Path.GetFileName(directory);
+                if (dirName == "small") { continue; }
                 ProcessDirectory(directory, path, destPath, size);
             }
         }
